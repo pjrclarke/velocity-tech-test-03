@@ -1,0 +1,97 @@
+{% assign per_page = section.settings.products_per_page | default: 24 %}
+
+<section class="collection">
+  <div class="page-width">
+    <h1 class="collection__title">{{ collection.title | default: 'Products' }}</h1>
+
+    {% paginate collection.products by per_page %}
+      <ul class="grid grid--4-col-desktop grid--2-col-tablet-down" role="list">
+        {% for product in collection.products %}
+          {% assign p = product %}
+          {% assign img = p.featured_image %}
+
+          {% assign size_value = '' %}
+          {% for opt in p.options_with_values %}
+            {% assign opt_name = opt.name | downcase %}
+            {% if opt_name contains 'size' %}
+              {% assign size_value = opt.values | first %}
+            {% endif %}
+          {% endfor %}
+
+          <li class="grid__item">
+            <article class="pcard" data-product-id="{{ p.id }}">
+              <div class="pcard__toprow">
+                {% if p.tags contains 'new' %}
+                  <span class="badge badge--new">🏆 New</span>
+                {% endif %}
+                <button class="pcard__wish" type="button" aria-label="Save">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 21s-7-4.4-9.3-8A5.6 5.6 0 0 1 12 6a5.6 5.6 0 0 1 9.3 7c-2.3 3.6-9.3 8-9.3 8Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              <a class="pcard__media" href="{{ p.url }}" aria-label="{{ p.title | escape }}">
+                {% if img %}
+                  {% assign alt_text = img.alt | default: p.title | escape %}
+                  {{ img
+                    | image_url: width: 540
+                    | image_tag:
+                        class: 'pcard__img',
+                        width: 270,
+                        height: 278,
+                        loading: 'lazy',
+                        alt: alt_text,
+                        sizes: '270px',
+                        widths: '270, 540' }}
+                {% endif %}
+              </a>
+
+              <div class="pcard__body">
+                <h3 class="pcard__title"><a href="{{ p.url }}">{{ p.title }}</a></h3>
+                {% if size_value != '' %}
+                  <div class="pcard__meta">Size {{ size_value }}</div>
+                {% endif %}
+
+                <hr class="pcard__rule">
+
+                {% if p.available %}
+                  <form class="pcard__form" method="post" action="{{ routes.cart_add_url }}" data-quick-add data-variant="{{ p.first_available_variant.id }}">
+                  <div class="qty qty--bubble" data-qty>
+                    <button class="qty__btn" type="button" data-qty-dec aria-label="Decrease">−</button>
+                    <input class="qty__input" name="quantity" value="0" inputmode="numeric" pattern="[0-9]*" aria-label="Quantity">
+                    <button class="qty__btn" type="button" data-qty-inc aria-label="Increase">＋</button>
+                  </div>
+                  <strong class="pcard__price">{{ p.price | money }}</strong>
+                </form>
+
+                {% else %}
+                  <p class="pcard__oos">Sold out</p>
+                {% endif %}
+              </div>
+            </article>
+          </li>
+        {% else %}
+          <li>No products found.</li>
+        {% endfor %}
+      </ul>
+
+      {% if paginate.pages > 1 %}
+        <nav class="pagination" role="navigation" aria-label="Pagination">
+          {% if paginate.previous %}<a href="{{ paginate.previous.url }}" rel="prev">Previous</a>{% endif %}
+          <span>Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
+          {% if paginate.next %}<a href="{{ paginate.next.url }}" rel="next">Next</a>{% endif %}
+        </nav>
+      {% endif %}
+    {% endpaginate %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Main collection",
+  "settings": [
+    { "type": "range", "id": "products_per_page", "label": "Products per page", "min": 8, "max": 48, "step": 4, "default": 24 }
+  ]
+}
+{% endschema %}
