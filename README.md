@@ -66,3 +66,19 @@ Current approach re-renders the **entire drawer section** after each change. Saf
   const drawer = document.querySelector('cart-drawer');
   drawer.open();
   drawer.querySelector('cart-drawer-items')?.scrollTo({ top: 0 });
+
+# Get started
+
+> **Prereqs:** Shopify CLI v3+, a dev store, and Git installed.
+
+### 1) Clone
+
+```bash
+git clone <YOUR_REPO_URL> velocity-tech-test
+cd velocity-tech-test
+
+# 1) Login in browser (no API token here)
+shopify login --store velocity-tech-test.myshopify.com
+
+# 2) Run local dev against your theme
+shopify theme dev --store velocity-tech-test.myshopify.com --theme 186188923217
